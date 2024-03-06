@@ -1,0 +1,180 @@
+-- Schema SQL 
+Drop schema bank;
+Create database bank;
+Use bank;
+-- Schema SQL - drops, creates and uses
+
+-- SQL for creating tables
+CREATE TABLE branch (
+    branch_name VARCHAR(50) PRIMARY KEY,
+    branch_city VARCHAR(50),
+    assets VARCHAR(50)
+);
+
+CREATE TABLE customer (
+    customer_name VARCHAR(50) PRIMARY KEY,
+    customer_street VARCHAR(50),
+    customer_city VARCHAR(50)
+);
+
+CREATE TABLE account (
+    account_number VARCHAR(50) PRIMARY KEY,
+    amount INT,
+    branch_name VARCHAR(50)
+--    FOREIGN KEY (branch_name) REFERENCES branch (branch_name)
+);
+
+CREATE TABLE loan (
+    loan_number VARCHAR(50) PRIMARY KEY,
+    amount INT,
+    branch_name VARCHAR(50)
+--    FOREIGN KEY (branch_name) REFERENCES branch (branch_name)
+);
+
+CREATE TABLE depositor (
+	customer_name VARCHAR(50),
+    account_number VARCHAR(50),
+    Primary KEY (customer_name, account_number)
+
+);
+
+CREATE TABLE borrower (
+	customer_name VARCHAR(50),
+    loan_number VARCHAR(50),
+    Primary KEY (customer_name, loan_number)
+	 
+);
+
+CREATE TABLE employee (
+	employee_name VARCHAR(50) PRIMARY KEY,
+    salary int,
+	branch_name VARCHAR(50)
+    -- FOREIGN KEY (branch_name) REFERENCES branch (branch_name)
+	
+);
+-- SQL to create tabled
+
+-- SQL to insert branch values
+INSERT INTO branch (branch_name, branch_city, assets)  values('Brighton', 'Brooklyn', 7100000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('Downtown', 'Brooklyn', 9000000);
+INSERT INTO branch (branch_name, branch_city, assets)  values('Mianus', 'Horseneck', 400000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('North Town', 'Rye', 3700000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('Perryridge', 'Horseneck', 1700000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('Pownal', 'Bennington', 300000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('Redwood', 'Palo Alto', 2100000); 
+INSERT INTO branch (branch_name, branch_city, assets)  values('Round Hill', 'Horseneck', 8000000);
+-- SQL to branch values
+
+-- SQL to insert account values
+INSERT INTO account (account_number, branch_name, amount)  values('A-101', 'Downtown', 500);
+INSERT INTO account (account_number, branch_name, amount)  values('A-102', 'Perryridge', 400);
+INSERT INTO account (account_number, branch_name, amount)  values('A-201', 'Brighton', 900); 
+INSERT INTO account (account_number, branch_name, amount)  values('A-215', 'Mianus', 700); 
+INSERT INTO account (account_number, branch_name, amount)  values('A-217', 'Brighton', 750);
+INSERT INTO account (account_number, branch_name, amount)  values('A-222', 'Redwood', 700);
+INSERT INTO account (account_number, branch_name, amount)  values('A-305', 'Round Hill', 350);
+-- SQL to insert values
+
+
+-- SQL to insert customer values
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Adams', 'Spring', 'Pittsfield'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Brooks', 'Senator', 'Brooklyn'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Curry', 'North', 'Rye'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Glenn', 'Sand Hill', 'Woodside');
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Green', 'Walnut', 'Stamford');  
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Johnson', 'Alma', 'Palo Alto');
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Jones', 'Main', 'Harrison'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Lindsay', 'Park', 'Pittsfield'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Smith', 'North', 'Rye'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Turner', 'Putnam', 'Stamford'); 
+INSERT INTO customer (customer_name, customer_street, customer_city)  values('Williams', 'Nassau', 'Princeton'); 
+-- SQL to customer values
+
+
+
+-- SQL to insert loan values
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-11', 'Round Hill', 900);
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-14', 'Downtown', 1500);
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-15', 'Perryridge', 1500);  
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-16', 'Perryridge', 1300); 
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-17', 'Downtown', 1000);  
+INSERT INTO loan (loan_number, branch_name, amount)  values('L-23', 'Redwood', 2000); 
+INSERT INTO loan (loan_number, branch_name, amount)  values('l-93', 'Mianus', 500);  
+-- SQL to loan values
+
+
+
+-- SQL to insert employee  values
+insert into employee (employee_name, branch_name, salary) values('Adams', 'Perryridge', 1500);
+insert into employee (employee_name, branch_name, salary) values('Brown', 'Perryridge', 1300);
+insert into employee (employee_name, branch_name, salary) values('Gopal', 'Perryridge', 5300);
+insert into employee (employee_name, branch_name, salary) values('Johnson', 'Downtown', 1500);
+insert into employee (employee_name, branch_name, salary) values('Loreena', 'Downtown', 1300);
+insert into employee (employee_name, branch_name, salary) values('Peterson', 'Downtown', 2500);
+insert into employee (employee_name, branch_name, salary) values('Rao', 'Austin', 1500);
+insert into employee (employee_name, branch_name, salary) values('Sato', 'Austin', 1600);
+-- SQL to insert employee  values
+
+-- SQL to insert depositor values
+INSERT INTO depositor (customer_name, account_number)  values('Hayes', 'A-102'); 
+INSERT INTO depositor (customer_name, account_number)  values('Johnson', 'A-102'); 
+INSERT INTO depositor (customer_name, account_number)  values('Johnson', 'A-201');
+INSERT INTO depositor (customer_name, account_number)  values('Jones', 'A-217'); 
+INSERT INTO depositor (customer_name, account_number)  values('Lindsay', 'A-222'); 
+INSERT INTO depositor (customer_name, account_number)  values('Smith', 'A-215'); 
+INSERT INTO depositor (customer_name, account_number)  values('Turner', 'A-305'); 
+-- SQL to depositor values
+
+-- SQL to insert borrower  values
+INSERT INTO borrower (customer_name, loan_number)  values('Adams', 'L-16'); 
+INSERT INTO borrower (customer_name, loan_number)  values('Curry', 'L-93'); 
+INSERT INTO borrower (customer_name, loan_number)  values('Hayes', 'L-15');  
+INSERT INTO borrower (customer_name, loan_number)  values('Jackson', 'L-14');
+INSERT INTO borrower (customer_name, loan_number)  values('Jones', 'L-17'); 
+INSERT INTO borrower (customer_name, loan_number)  values('Smith', 'L-11');
+INSERT INTO borrower (customer_name, loan_number)  values('Smith', 'L-23'); 
+INSERT INTO borrower (customer_name, loan_number)  values('Williams', 'L-17');
+-- SQL to borrower values
+
+-- Question 1 Find the names of all customers
+Select customer_name from customer;
+-- Q1
+
+-- Question 2 Find the names of all branches in the loan relation, don't display duplicates
+Select branch_name from branch group by branch_name;
+-- Q2
+
+-- Question 3 Display the entire Branch table
+Select * from branch;
+-- Q3
+
+-- Question 4  Find the account number for all accounts where the balance is greater than $700
+Select account_number from account where amount > 700;
+-- Q4
+
+-- Question 5   Find the account number and balance for all accounts from Brighton where the balance is greater than $800
+Select account_number, amount from account where amount > 800 and branch_name = 'brighton';
+-- Q5
+
+-- Question 6    Display the branch name and assets from all branches in thousands of dollars and rename the assets column to 'assets in thousands'
+Select branch_name, assets as "assets in thousands" from branch where assets >= 1000;
+-- Q6
+
+-- Question 7    Find the name of all branches with assets between one and four million dollars. 
+Select branch_name from branch where assets >= 1000000 and assets <= 4000000 ;
+-- Q7
+
+-- Question 8    Find the name, account number, and balance of all customers who have an account. 
+
+Select  customer_name,a.account_number, amount 
+from account a Left join depositor d
+on a.account_number = d.account_number;
+-- Q8
+
+-- Question 9    Find the name, account number, and balance of all customers who have an account with a balance of $400 or less 
+Select  customer_name,a.account_number, amount 
+from account a Left join depositor d
+on a.account_number = d.account_number
+where amount <= 400;
+-- Q9
+
