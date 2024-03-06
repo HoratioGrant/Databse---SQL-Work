@@ -1,0 +1,193 @@
+
+use classicmodels;
+
+alter table teams drop totalpts;
+alter table teams add totalpts int;
+SELECT * FROM classicmodels.teams;
+
+-- question 1 
+-- i) Create a stored procedure to keep track of the total points of athletes running for each team. Demonstrate how you would validate your procedure, ensuring that only authorized users can run this procedure.
+delimiter //
+ drop procedure if exists totalP//
+ 
+create procedure totalP (IN num text)
+begin
+	update teams set totalpts = (select sum(points) 
+							from athletes 
+							where tno = num
+							) where tnumber = num;
+end; //
+delimiter ;
+call totalP('D001');
+call totalP('D002');
+call totalP('D003');
+SELECT * FROM classicmodels.teams;
+
+-- ii) Create a stored procedure with a cursor (to update all the rows simultaneously) to keep track of the total points of athletes running for each team. Demonstrate how you would validate your procedure, ensuring that only authorized users can run this procedure.
+delimiter //
+drop procedure if exists curTotalP//
+create procedure curTotalP()
+	begin
+		declare done int default 0;
+        declare current_dnum text;
+        declare dnumcur cursor for select tnumber from teams;
+        declare continue handler for not found set done = 1;
+		open dnumcur;
+        repeat
+			fetch dnumcur into current_dnum;
+            update teams set totalpts = (select sum(points) 
+							from athletes 
+							where tno = current_dnum
+							) where tnumber = current_dnum;
+			until done
+            end repeat;
+	end//
+delimiter ;
+call curTotalP;
+SELECT * FROM classicmodels.teams;
+
+-- iii) Create a procedure to give 10% bonus points to all athletes. Demonstrate how you would validate your procedure, ensuring that only authorized users can run this procedure
+delimiter //
+drop procedure if exists bonusP//
+create procedure bonusP()
+
+	begin
+		declare done int default 0;
+        declare current_dnum int;
+        declare dnumcur cursor for select id from athletes;
+        declare continue handler for not found set done = 1;
+
+		open dnumcur;
+        repeat
+			fetch dnumcur into current_dnum;
+            update athletes set points = (select (points * 1.1)
+							where id = current_dnum
+							) where id = current_dnum;
+			until done
+            end repeat;
+	end//
+delimiter ;
+call bonusP();
+SELECT * FROM classicmodels.athletes;
+
+-- question 2
+-- i ) Create a function that awards a 10% bonus points to all athletes. Demonstrate how you would validate your function, ensuring that only authorized users can run the function.
+delimiter //
+drop procedure if exists bonusP2//
+create procedure bonusP2()
+	begin
+		declare done int default 0;
+        declare current_dnum int;
+        declare dnumcur cursor for select id from athletes;
+        declare continue handler for not found set done = 1;
+		open dnumcur;
+        repeat
+			fetch dnumcur into current_dnum;
+            update athletes set points = (select (points * 1.1)
+							where id = current_dnum
+							) where id = current_dnum;
+			until done
+            end repeat;
+	end//
+delimiter ;
+call bonusP2();
+SELECT * FROM classicmodels.athletes;
+
+-- ii) Load and extract the provided self-contained sampledb.sql file into MySQL Workbench. Use the customer table create a function that returns the customer level based on the following credits limit levels
+DELIMITER //
+drop function if exists CustomerLevel//
+CREATE FUNCTION CustomerLevel(credit DECIMAL(10,2)) 
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE customerLevel VARCHAR(20);
+    IF credit > 50000 THEN
+		SET customerLevel = 'PLATINUM';
+    ELSEIF (credit <= 50000 AND 
+			credit >= 10000) THEN
+        SET customerLevel = 'GOLD';
+    ELSEIF credit < 10000 THEN
+        SET customerLevel = 'SILVER';
+    END IF;
+	-- return the customer level
+	RETURN (customerLevel);
+END//
+DELIMITER ;
+select customerNumber,customerName, CustomerLevel(creditLimit) from customers
+
+-- iii) Create a stored procedure to call the function in question (2 ii). Demonstrate how you would validate this procedure, ensuring that only authorized users can run this procedure.
+delimiter //
+drop procedure if exists checkCreditLevel//
+create procedure checkCreditLevel( IN id int)
+	begin
+        select customerNumber, customerName, CustomerLevel(creditLimit) from customers where customerNumber = id;
+	end//
+delimiter ;
+call checkCreditLevel(103);
+
+-- question 3
+-- i ) Create a trigger to update the total points of a team when a new member joins. Demonstrate how you would validate your trigger when a new member joins a team, ensuring that only authorized users can run this trigger
+drop trigger if exists updatePoints_new;
+delimiter //
+CREATE TRIGGER updatePoints_new
+AFTER INSERT ON athletes
+FOR EACH ROW
+	begin
+	if new.tno is not null then
+		update teams
+        set totalPts = totalPts + new.points
+        where teams.tnumber = new.tno;
+	end if;
+    end//
+    delimiter ;
+    insert into athletes (id,name, points, edate, tno) values (10,"Horatio",15,"09/12/2023","D003");
+    SELECT * FROM classicmodels.teams;
+
+-- ii) Create a trigger to update the total points of a team when an athlete’s tuple is modified. Demonstrate how you would validate your trigger when a tuple is modified, ensuring that only authorized users can run this trigger
+drop trigger if exists updatePoints_up;
+delimiter //
+CREATE TRIGGER updatePoints_up
+AFTER update ON athletes
+FOR EACH ROW
+	begin
+	if old.tno is not null then
+		update teams
+        set totalPts = totalPts - old.points
+        where teams.tnumber = old.tno;
+	end if;
+    if new.tno is not null then
+		update teams
+		set totalPts = totalPts + new.points -- add the new updated salary to the current total salary
+		where teams.tnumber =new.tno;
+	end if;
+    end//
+    delimiter ;
+ update athletes set points = 5 where name = "Horatio";   
+  SELECT * FROM classicmodels.teams;
+
+
+
+
+
+
+
+-- iii) Create a trigger to update the total points of a team when an athlete’s tuple is deleted. Demonstrate how you would validate your trigger when a tuple is deleted, ensuring that only authorized users can run this trigger.
+drop trigger if exists updatePoints_del;
+delimiter //
+CREATE TRIGGER updatePoints_del
+AFTER delete ON athletes
+FOR EACH ROW
+	begin
+	if old.tno is not null then
+		update teams
+        set totalPts = totalPts - old.points
+        where teams.tnumber = old.tno;
+	end if;
+    
+    end//
+    delimiter ;
+    delete from athletes where name = "horatio";
+
+
+
+      SELECT * FROM classicmodels.teams;
