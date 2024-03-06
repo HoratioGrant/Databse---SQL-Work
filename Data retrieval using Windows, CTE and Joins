@@ -1,0 +1,145 @@
+Use a1;
+
+-- Q1a)
+select rental_date, title, genre, payment_amount, 
+rank() over(order by payment_amount desc) 
+from movie m Left join single_rental s
+on m.id = s.movie_id;
+
+-- Q1b)
+select id, length, platform, payment_date, payment_amount, sum(payment_amount) over ( partition by payment_date)
+from subscription;
+
+-- Q1c)
+select id, length, platform, payment_date, payment_amount, sum(payment_amount) 
+over (PARTITION BY payment_date
+ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+) as 'Future Cashflows'
+from subscription order by id asc;
+
+-- Q1d)
+select id, rental_date, lag(payment_amount) over(), sum(payment_amount) 
+over (
+PARTITION BY rental_date
+ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+) as 'Todays Rental Amnt' 
+from single_rental order by id asc;
+
+-- Q1e)
+With review_average as(
+select distinct title, genre, avg (rating) 
+over (partition by movie_id
+ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+) as rating
+from review r Left join movie m
+on r.movie_id = m.id  )
+select * , rank() over( order by rating desc) from review_average;
+
+-- Q1f
+with platform_sum as(
+select distinct platform, sum(price) 
+over (partition by platform
+ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+) as sum from game g Left join purchase p
+on g.id = p.game_id )
+Select *, rank() over(order by sum desc) as rnk from platform_sum;
+
+-- 1g)
+select day, revenue, nth_value(revenue, 3) over(order by revenue desc ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING) as '3rd Highest Revenue' from website w left join statistic s on
+w.id = s.website_id where w.id = 1 and day between '2016-05-15' and '2016-05-20';
+
+-- 1h)
+select website_id, revenue, 
+Max(revenue) 
+over(order by revenue desc) 
+as ' Highest Revenue' ,
+Min(revenue) over() from  statistic  where day = '2016-05-14';
+
+-- 2a)
+select day, users, Lead(users) over() as 'Next Day Users' from statistic where website_id = 1;
+
+-- 2b) 
+select day, clicks as "today's clicks", lead(clicks) over() as "Next Day's clicks" , clicks - lead(clicks) over() as Difference from statistic;
+
+-- 2c)
+select day, users, lead(users, 7) 
+over(  ) 
+as "User's in 7 Days"
+from statistic where website_id = 1 and day between '2016-05-01' and '2016-05-14';
+
+-- 3a)
+Select name, ntile(3) over(order by editor_rating desc) as rnk from game;
+
+-- 3b)
+Select distinct nth_value(name, 2) over(order by editor_rating desc
+ ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+ ) as '2nd ranked game' from game; 
+
+-- 3c)
+with ranked as(
+Select distinct name, platform, updated, row_number() over(order by updated desc
+ ROWS BETWEEN
+UNBOUNDED PRECEDING
+AND
+UNBOUNDED FOLLOWING
+ ) as 'RowNum' from game)
+ select name, platform, updated from ranked where RowNum = 2; 
+ 
+ -- 4a)
+ select date, time, 
+high, ROUND (AVG(high) OVER w1,1) AS High_avg,ROUND (MIN(high) OVER w1,1) AS High_min,ROUND (MAX(high) OVER w1,1) AS High_max,
+close, ROUND (AVG(close) OVER w1,1) AS Close_avg, ROUND (MIN(close) OVER w1,1) AS Close_min, ROUND (MAX(close) OVER w1,1) AS Close_max,
+volume, ROUND (AVG(volume) OVER w1,1) AS Volume_avg,ROUND (MIN(volume) OVER w1,1) AS Volume_min,ROUND (MAX(volume) OVER w1,1) AS Volume_max
+from toronto_stock_data
+WINDOW w1 AS (
+PARTITION BY date ORDER BY date,time
+ROWS BETWEEN UNBOUNDED PRECEDING
+AND UNBOUNDED FOLLOWING);
+
+-- 4b)
+select date, time, 
+high,ROUND (AVG(high) OVER w1,1) AS High_avg, ROUND (MIN(high) OVER w1,1) AS High_min, ROUND (MAX(high) OVER w1,1) AS High_max,
+close,ROUND (AVG(close) OVER w1,1) AS Close_avg,ROUND (MIN(close) OVER w1,1) AS Close_min,ROUND (MAX(close) OVER w1,1) AS Close_max,
+volume,ROUND (AVG(volume) OVER w1,1) AS Volume_avg,ROUND (MIN(volume) OVER w1,1) AS Volume_min,ROUND (MAX(volume) OVER w1,1) AS Volume_max
+from toronto_stock_data 
+where volume = (select volume from toronto_stock_data order by volume desc limit 1)
+or volume = (select volume from toronto_stock_data order by volume asc limit 1)
+WINDOW
+w1 AS (PARTITION BY date ORDER BY date,time
+ROWS BETWEEN UNBOUNDED PRECEDING
+AND UNBOUNDED FOLLOWING);
+
+-- 4c) 
+select date, time,
+high, ROUND (AVG(high) OVER w1,1) AS "3 Day High avg",
+close, ROUND (AVG(close) OVER w1,1) AS "3 Day Close avg",
+volume, ROUND (AVG(volume) OVER w1,1) AS "3 Day Volume avg"
+from toronto_stock_data
+WINDOW
+w1 AS ( PARTITION BY date ORDER BY date,time
+ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING);
+
+
+
+
+
+
+
